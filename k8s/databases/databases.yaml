@@ -2,7 +2,7 @@ apiVersion: v1
 kind: Secret
 metadata:
   name: db-secret
-  namespace: newera
+  namespace: default
 type: Opaque
 stringData:
   POSTGRES_USER: newera
@@ -12,7 +12,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: user-db
-  namespace: newera
+  namespace: default
 spec:
   replicas: 1
   selector:
@@ -41,7 +41,7 @@ apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
   name: user-db-pvc
-  namespace: newera
+  namespace: default
 spec:
   accessModes: ["ReadWriteOnce"]
   resources: { requests: { storage: 1Gi } }
@@ -50,7 +50,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: user-db
-  namespace: newera
+  namespace: default
 spec:
   selector: { app: user-db }
   ports: [{ port: 5432, targetPort: 5432 }]
@@ -59,7 +59,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: order-db
-  namespace: newera
+  namespace: default
 spec:
   replicas: 1
   selector:
@@ -88,7 +88,7 @@ apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
   name: order-db-pvc
-  namespace: newera
+  namespace: default
 spec:
   accessModes: ["ReadWriteOnce"]
   resources: { requests: { storage: 1Gi } }
@@ -97,7 +97,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: order-db
-  namespace: newera
+  namespace: default
 spec:
   selector: { app: order-db }
   ports: [{ port: 5432, targetPort: 5432 }]
@@ -106,7 +106,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: product-db
-  namespace: newera
+  namespace: default
 spec:
   replicas: 1
   selector:
@@ -130,7 +130,7 @@ apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
   name: product-db-pvc
-  namespace: newera
+  namespace: default
 spec:
   accessModes: ["ReadWriteOnce"]
   resources: { requests: { storage: 1Gi } }
@@ -139,7 +139,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: product-db
-  namespace: newera
+  namespace: default
 spec:
   selector: { app: product-db }
   ports: [{ port: 27017, targetPort: 27017 }]
@@ -148,7 +148,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: auth-db
-  namespace: newera
+  namespace: default
 spec:
   replicas: 1
   selector:
@@ -177,7 +177,7 @@ apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
   name: auth-db-pvc
-  namespace: newera
+  namespace: default
 spec:
   accessModes: ["ReadWriteOnce"]
   resources: { requests: { storage: 1Gi } }
@@ -186,7 +186,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: auth-db
-  namespace: newera
+  namespace: default
 spec:
   selector: { app: auth-db }
   ports: [{ port: 5432, targetPort: 5432 }]
@@ -195,7 +195,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: inventory-db
-  namespace: newera
+  namespace: default
 spec:
   replicas: 1
   selector:
@@ -224,7 +224,7 @@ apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
   name: inventory-db-pvc
-  namespace: newera
+  namespace: default
 spec:
   accessModes: ["ReadWriteOnce"]
   resources: { requests: { storage: 1Gi } }
@@ -233,7 +233,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: inventory-db
-  namespace: newera
+  namespace: default
 spec:
   selector: { app: inventory-db }
   ports: [{ port: 5432, targetPort: 5432 }]
@@ -242,7 +242,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: payment-db
-  namespace: newera
+  namespace: default
 spec:
   replicas: 1
   selector:
@@ -271,7 +271,7 @@ apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
   name: payment-db-pvc
-  namespace: newera
+  namespace: default
 spec:
   accessModes: ["ReadWriteOnce"]
   resources: { requests: { storage: 1Gi } }
@@ -280,7 +280,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: payment-db
-  namespace: newera
+  namespace: default
 spec:
   selector: { app: payment-db }
   ports: [{ port: 5432, targetPort: 5432 }]
@@ -289,7 +289,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: notification-db
-  namespace: newera
+  namespace: default
 spec:
   replicas: 1
   selector:
@@ -313,7 +313,7 @@ apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
   name: notification-db-pvc
-  namespace: newera
+  namespace: default
 spec:
   accessModes: ["ReadWriteOnce"]
   resources: { requests: { storage: 1Gi } }
@@ -322,7 +322,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: notification-db
-  namespace: newera
+  namespace: default
 spec:
   selector: { app: notification-db }
   ports: [{ port: 27017, targetPort: 27017 }]

@@ -2,7 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: payment-service
-  namespace: newera
+  namespace: default
 spec:
   replicas: 2
   selector:
@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
         - name: payment-service
-          image: newera/payment-service:latest
+          image: default/payment-service:latest
           imagePullPolicy: IfNotPresent
           ports: [{ containerPort: 3006 }]
           env:
@@ -36,7 +36,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: payment-service
-  namespace: newera
+  namespace: default
 spec:
   selector: { app: payment-service }
   ports: [{ port: 3006, targetPort: 3006 }]

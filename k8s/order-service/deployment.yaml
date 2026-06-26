@@ -2,7 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: order-service
-  namespace: newera
+  namespace: default
 spec:
   replicas: 2
   selector:
@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
         - name: order-service
-          image: newera/order-service:latest
+          image: default/order-service:latest
           imagePullPolicy: IfNotPresent
           ports: [{ containerPort: 3003 }]
           env:
@@ -46,7 +46,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: order-service
-  namespace: newera
+  namespace: default
 spec:
   selector: { app: order-service }
   ports: [{ port: 3003, targetPort: 3003 }]

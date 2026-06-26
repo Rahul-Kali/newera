@@ -2,7 +2,7 @@ apiVersion: v1
 kind: Secret
 metadata:
   name: alertmanager-smtp-secret
-  namespace: newera
+  namespace: default
 type: Opaque
 stringData:
   SMTP_PASS: "REPLACE_WITH_GMAIL_APP_PASSWORD"
@@ -11,7 +11,7 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: alertmanager-config
-  namespace: newera
+  namespace: default
 data:
   alertmanager.yml: |
     global:
@@ -39,7 +39,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: alertmanager
-  namespace: newera
+  namespace: default
 spec:
   replicas: 1
   selector:
@@ -63,7 +63,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: alertmanager
-  namespace: newera
+  namespace: default
 spec:
   type: NodePort
   selector: { app: alertmanager }

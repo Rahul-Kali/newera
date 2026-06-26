@@ -2,9 +2,9 @@ pipeline {
     agent any
 
     environment {
-        DOCKER_REGISTRY = "newera"
+        DOCKER_REGISTRY = "default"
         IMAGE_TAG = "${env.BUILD_NUMBER}"
-        KUBE_NAMESPACE = "newera"
+        KUBE_NAMESPACE = "default"
     }
 
     stages {
@@ -61,7 +61,6 @@ pipeline {
         stage('Deploy to Kubernetes (Minikube)') {
             steps {
                 sh """
-                  kubectl apply -f k8s/00-namespace.yaml
                   kubectl apply -f k8s/databases/databases.yaml
                   kubectl apply -f k8s/user-service/deployment.yaml
                   kubectl apply -f k8s/product-service/deployment.yaml
