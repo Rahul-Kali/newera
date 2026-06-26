@@ -1,0 +1,328 @@
+apiVersion: v1
+kind: Secret
+metadata:
+  name: db-secret
+  namespace: newera
+type: Opaque
+stringData:
+  POSTGRES_USER: newera
+  POSTGRES_PASSWORD: newera123
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: user-db
+  namespace: newera
+spec:
+  replicas: 1
+  selector:
+    matchLabels: { app: user-db }
+  template:
+    metadata:
+      labels: { app: user-db }
+    spec:
+      containers:
+        - name: user-db
+          image: postgres:16-alpine
+          envFrom:
+            - secretRef: { name: db-secret }
+          env:
+            - name: POSTGRES_DB
+              value: userdb
+          ports: [{ containerPort: 5432 }]
+          volumeMounts:
+            - name: data
+              mountPath: /var/lib/postgresql/data
+      volumes:
+        - name: data
+          persistentVolumeClaim: { claimName: user-db-pvc }
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: user-db-pvc
+  namespace: newera
+spec:
+  accessModes: ["ReadWriteOnce"]
+  resources: { requests: { storage: 1Gi } }
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: user-db
+  namespace: newera
+spec:
+  selector: { app: user-db }
+  ports: [{ port: 5432, targetPort: 5432 }]
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: order-db
+  namespace: newera
+spec:
+  replicas: 1
+  selector:
+    matchLabels: { app: order-db }
+  template:
+    metadata:
+      labels: { app: order-db }
+    spec:
+      containers:
+        - name: order-db
+          image: postgres:16-alpine
+          envFrom:
+            - secretRef: { name: db-secret }
+          env:
+            - name: POSTGRES_DB
+              value: orderdb
+          ports: [{ containerPort: 5432 }]
+          volumeMounts:
+            - name: data
+              mountPath: /var/lib/postgresql/data
+      volumes:
+        - name: data
+          persistentVolumeClaim: { claimName: order-db-pvc }
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: order-db-pvc
+  namespace: newera
+spec:
+  accessModes: ["ReadWriteOnce"]
+  resources: { requests: { storage: 1Gi } }
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: order-db
+  namespace: newera
+spec:
+  selector: { app: order-db }
+  ports: [{ port: 5432, targetPort: 5432 }]
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: product-db
+  namespace: newera
+spec:
+  replicas: 1
+  selector:
+    matchLabels: { app: product-db }
+  template:
+    metadata:
+      labels: { app: product-db }
+    spec:
+      containers:
+        - name: product-db
+          image: mongo:7
+          ports: [{ containerPort: 27017 }]
+          volumeMounts:
+            - name: data
+              mountPath: /data/db
+      volumes:
+        - name: data
+          persistentVolumeClaim: { claimName: product-db-pvc }
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: product-db-pvc
+  namespace: newera
+spec:
+  accessModes: ["ReadWriteOnce"]
+  resources: { requests: { storage: 1Gi } }
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: product-db
+  namespace: newera
+spec:
+  selector: { app: product-db }
+  ports: [{ port: 27017, targetPort: 27017 }]
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: auth-db
+  namespace: newera
+spec:
+  replicas: 1
+  selector:
+    matchLabels: { app: auth-db }
+  template:
+    metadata:
+      labels: { app: auth-db }
+    spec:
+      containers:
+        - name: auth-db
+          image: postgres:16-alpine
+          envFrom:
+            - secretRef: { name: db-secret }
+          env:
+            - name: POSTGRES_DB
+              value: authdb
+          ports: [{ containerPort: 5432 }]
+          volumeMounts:
+            - name: data
+              mountPath: /var/lib/postgresql/data
+      volumes:
+        - name: data
+          persistentVolumeClaim: { claimName: auth-db-pvc }
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: auth-db-pvc
+  namespace: newera
+spec:
+  accessModes: ["ReadWriteOnce"]
+  resources: { requests: { storage: 1Gi } }
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: auth-db
+  namespace: newera
+spec:
+  selector: { app: auth-db }
+  ports: [{ port: 5432, targetPort: 5432 }]
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: inventory-db
+  namespace: newera
+spec:
+  replicas: 1
+  selector:
+    matchLabels: { app: inventory-db }
+  template:
+    metadata:
+      labels: { app: inventory-db }
+    spec:
+      containers:
+        - name: inventory-db
+          image: postgres:16-alpine
+          envFrom:
+            - secretRef: { name: db-secret }
+          env:
+            - name: POSTGRES_DB
+              value: inventorydb
+          ports: [{ containerPort: 5432 }]
+          volumeMounts:
+            - name: data
+              mountPath: /var/lib/postgresql/data
+      volumes:
+        - name: data
+          persistentVolumeClaim: { claimName: inventory-db-pvc }
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: inventory-db-pvc
+  namespace: newera
+spec:
+  accessModes: ["ReadWriteOnce"]
+  resources: { requests: { storage: 1Gi } }
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: inventory-db
+  namespace: newera
+spec:
+  selector: { app: inventory-db }
+  ports: [{ port: 5432, targetPort: 5432 }]
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: payment-db
+  namespace: newera
+spec:
+  replicas: 1
+  selector:
+    matchLabels: { app: payment-db }
+  template:
+    metadata:
+      labels: { app: payment-db }
+    spec:
+      containers:
+        - name: payment-db
+          image: postgres:16-alpine
+          envFrom:
+            - secretRef: { name: db-secret }
+          env:
+            - name: POSTGRES_DB
+              value: paymentdb
+          ports: [{ containerPort: 5432 }]
+          volumeMounts:
+            - name: data
+              mountPath: /var/lib/postgresql/data
+      volumes:
+        - name: data
+          persistentVolumeClaim: { claimName: payment-db-pvc }
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: payment-db-pvc
+  namespace: newera
+spec:
+  accessModes: ["ReadWriteOnce"]
+  resources: { requests: { storage: 1Gi } }
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: payment-db
+  namespace: newera
+spec:
+  selector: { app: payment-db }
+  ports: [{ port: 5432, targetPort: 5432 }]
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: notification-db
+  namespace: newera
+spec:
+  replicas: 1
+  selector:
+    matchLabels: { app: notification-db }
+  template:
+    metadata:
+      labels: { app: notification-db }
+    spec:
+      containers:
+        - name: notification-db
+          image: mongo:7
+          ports: [{ containerPort: 27017 }]
+          volumeMounts:
+            - name: data
+              mountPath: /data/db
+      volumes:
+        - name: data
+          persistentVolumeClaim: { claimName: notification-db-pvc }
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: notification-db-pvc
+  namespace: newera
+spec:
+  accessModes: ["ReadWriteOnce"]
+  resources: { requests: { storage: 1Gi } }
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: notification-db
+  namespace: newera
+spec:
+  selector: { app: notification-db }
+  ports: [{ port: 27017, targetPort: 27017 }]

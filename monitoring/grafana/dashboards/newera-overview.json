@@ -1,0 +1,39 @@
+{
+  "title": "NEWERA Microservices Overview",
+  "schemaVersion": 39,
+  "version": 1,
+  "panels": [
+    {
+      "title": "HTTP Requests Total (by service)",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 0 },
+      "targets": [
+        { "expr": "sum(rate(http_requests_total[1m])) by (job)", "legendFormat": "{{job}}" }
+      ]
+    },
+    {
+      "title": "Gateway Requests Total",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 0 },
+      "targets": [
+        { "expr": "sum(rate(gateway_requests_total[1m])) by (route)", "legendFormat": "{{route}}" }
+      ]
+    },
+    {
+      "title": "Process CPU Seconds (per service)",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 8 },
+      "targets": [
+        { "expr": "rate(process_cpu_seconds_total[1m])", "legendFormat": "{{job}}" }
+      ]
+    },
+    {
+      "title": "Node.js Heap Used (bytes)",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 8 },
+      "targets": [
+        { "expr": "nodejs_heap_size_used_bytes", "legendFormat": "{{job}}" }
+      ]
+    }
+  ]
+}

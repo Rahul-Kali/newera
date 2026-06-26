@@ -1,0 +1,242 @@
+version: "3.9"
+
+networks:
+  newera-net:
+    driver: bridge
+
+volumes:
+  user-db-data:
+  order-db-data:
+  product-db-data:
+  auth-db-data:
+  inventory-db-data:
+  payment-db-data:
+  notification-db-data:
+  grafana-data:
+  jenkins-data:
+
+services:
+  user-db:
+    image: postgres:16-alpine
+    container_name: user-db
+    environment:
+      POSTGRES_USER: newera
+      POSTGRES_PASSWORD: newera123
+      POSTGRES_DB: userdb
+    volumes:
+      - user-db-data:/var/lib/postgresql/data
+    networks: [newera-net]
+
+  order-db:
+    image: postgres:16-alpine
+    container_name: order-db
+    environment:
+      POSTGRES_USER: newera
+      POSTGRES_PASSWORD: newera123
+      POSTGRES_DB: orderdb
+    volumes:
+      - order-db-data:/var/lib/postgresql/data
+    networks: [newera-net]
+
+  product-db:
+    image: mongo:7
+    container_name: product-db
+    volumes:
+      - product-db-data:/data/db
+    networks: [newera-net]
+
+  auth-db:
+    image: postgres:16-alpine
+    container_name: auth-db
+    environment:
+      POSTGRES_USER: newera
+      POSTGRES_PASSWORD: newera123
+      POSTGRES_DB: authdb
+    volumes:
+      - auth-db-data:/var/lib/postgresql/data
+    networks: [newera-net]
+
+  inventory-db:
+    image: postgres:16-alpine
+    container_name: inventory-db
+    environment:
+      POSTGRES_USER: newera
+      POSTGRES_PASSWORD: newera123
+      POSTGRES_DB: inventorydb
+    volumes:
+      - inventory-db-data:/var/lib/postgresql/data
+    networks: [newera-net]
+
+  payment-db:
+    image: postgres:16-alpine
+    container_name: payment-db
+    environment:
+      POSTGRES_USER: newera
+      POSTGRES_PASSWORD: newera123
+      POSTGRES_DB: paymentdb
+    volumes:
+      - payment-db-data:/var/lib/postgresql/data
+    networks: [newera-net]
+
+  notification-db:
+    image: mongo:7
+    container_name: notification-db
+    volumes:
+      - notification-db-data:/data/db
+    networks: [newera-net]
+
+  user-service:
+    build: ./services/user-service
+    container_name: user-service
+    environment:
+      DB_HOST: user-db
+      DB_USER: newera
+      DB_PASSWORD: newera123
+      DB_NAME: userdb
+      PORT: 3001
+    depends_on: [user-db]
+    ports: ["3001:3001"]
+    networks: [newera-net]
+
+  product-service:
+    build: ./services/product-service
+    container_name: product-service
+    environment:
+      MONGO_URI: mongodb://product-db:27017/productdb
+      PORT: 3002
+    depends_on: [product-db]
+    ports: ["3002:3002"]
+    networks: [newera-net]
+
+  auth-service:
+    build: ./services/auth-service
+    container_name: auth-service
+    environment:
+      DB_HOST: auth-db
+      DB_USER: newera
+      DB_PASSWORD: newera123
+      DB_NAME: authdb
+      PORT: 3004
+      JWT_SECRET: newera-super-secret-change-me
+    depends_on: [auth-db]
+    ports: ["3004:3004"]
+    networks: [newera-net]
+
+  inventory-service:
+    build: ./services/inventory-service
+    container_name: inventory-service
+    environment:
+      DB_HOST: inventory-db
+      DB_USER: newera
+      DB_PASSWORD: newera123
+      DB_NAME: inventorydb
+      PORT: 3005
+    depends_on: [inventory-db]
+    ports: ["3005:3005"]
+    networks: [newera-net]
+
+  payment-service:
+    build: ./services/payment-service
+    container_name: payment-service
+    environment:
+      DB_HOST: payment-db
+      DB_USER: newera
+      DB_PASSWORD: newera123
+      DB_NAME: paymentdb
+      PORT: 3006
+    depends_on: [payment-db]
+    ports: ["3006:3006"]
+    networks: [newera-net]
+
+  notification-service:
+    build: ./services/notification-service
+    container_name: notification-service
+    environment:
+      MONGO_URI: mongodb://notification-db:27017/notificationdb
+      PORT: 3007
+      ALERT_EMAIL: kalirahul176@gmail.com
+      SMTP_HOST: ${SMTP_HOST:-smtp.gmail.com}
+      SMTP_PORT: ${SMTP_PORT:-587}
+      SMTP_USER: ${SMTP_USER:-}
+      SMTP_PASS: ${SMTP_PASS:-}
+      SMTP_FROM: ${SMTP_FROM:-}
+    depends_on: [notification-db]
+    ports: ["3007:3007"]
+    networks: [newera-net]
+
+  order-service:
+    build: ./services/order-service
+    container_name: order-service
+    environment:
+      DB_HOST: order-db
+      DB_USER: newera
+      DB_PASSWORD: newera123
+      DB_NAME: orderdb
+      PORT: 3003
+      USER_SERVICE_URL: http://user-service:3001
+      PRODUCT_SERVICE_URL: http://product-service:3002
+      INVENTORY_SERVICE_URL: http://inventory-service:3005
+      PAYMENT_SERVICE_URL: http://payment-service:3006
+      NOTIFICATION_SERVICE_URL: http://notification-service:3007
+    depends_on: [order-db, user-service, product-service, inventory-service, payment-service, notification-service]
+    ports: ["3003:3003"]
+    networks: [newera-net]
+
+  api-gateway:
+    build: ./api-gateway
+    container_name: api-gateway
+    environment:
+      USER_SERVICE_URL: http://user-service:3001
+      PRODUCT_SERVICE_URL: http://product-service:3002
+      ORDER_SERVICE_URL: http://order-service:3003
+      AUTH_SERVICE_URL: http://auth-service:3004
+      INVENTORY_SERVICE_URL: http://inventory-service:3005
+      PAYMENT_SERVICE_URL: http://payment-service:3006
+      NOTIFICATION_SERVICE_URL: http://notification-service:3007
+      PORT: 8080
+    depends_on: [user-service, product-service, order-service, auth-service, inventory-service, payment-service, notification-service]
+    ports: ["8080:8080"]
+    networks: [newera-net]
+
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: prometheus
+    volumes:
+      - ./monitoring/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+      - ./monitoring/prometheus/alert.rules.yml:/etc/prometheus/alert.rules.yml
+    ports: ["9090:9090"]
+    depends_on: [alertmanager]
+    networks: [newera-net]
+
+  alertmanager:
+    image: prom/alertmanager:latest
+    container_name: alertmanager
+    volumes:
+      - ./monitoring/alertmanager/alertmanager.yml:/etc/alertmanager/alertmanager.yml
+    ports: ["9093:9093"]
+    networks: [newera-net]
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: grafana
+    environment:
+      GF_SECURITY_ADMIN_USER: admin
+      GF_SECURITY_ADMIN_PASSWORD: admin123
+    volumes:
+      - grafana-data:/var/lib/grafana
+    ports: ["3000:3000"]
+    depends_on: [prometheus]
+    networks: [newera-net]
+
+  jenkins:
+    image: jenkins/jenkins:lts-jdk17
+    container_name: jenkins
+    privileged: true
+    user: root
+    volumes:
+      - jenkins-data:/var/jenkins_home
+      - /var/run/docker.sock:/var/run/docker.sock
+    ports:
+      - "8081:8080"
+      - "50000:50000"
+    networks: [newera-net]

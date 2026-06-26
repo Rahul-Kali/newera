@@ -1,0 +1,74 @@
+groups:
+  - name: newera-alerts
+    rules:
+      - alert: ServiceDown
+        expr: up == 0
+        for: 30s
+        labels:
+          severity: critical
+        annotations:
+          summary: "{{ $labels.job }} is DOWN"
+          description: "Prometheus has not been able to scrape {{ $labels.job }} for 30 seconds."
+
+      - alert: HighErrorRate
+        expr: sum(rate(http_requests_total{status=~"5.."}[2m])) by (job) > 0.05
+        for: 1m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High 5xx error rate on {{ $labels.job }}"
+          description: "{{ $labels.job }} is returning 5xx responses at more than 0.05 req/s over the last 2 minutes."
+
+      - alert: HighLatency
+        expr: histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket[5m])) by (le, job)) > 1
+        for: 2m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High p95 latency on {{ $labels.job }}"
+          description: "95th percentile latency for {{ $labels.job }} has exceeded 1s for 2 minutes."
+
+      - alert: PaymentFailureSpike
+        expr: increase(payment_failures_total[5m]) > 5
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Spike in payment failures"
+          description: "More than 5 payment failures in the last 5 minutes - investigate payment-service / gateway."
+
+      - alert: AuthFailureSpike
+        expr: increase(auth_failures_total[5m]) > 10
+        for: 1m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Spike in failed login attempts"
+          description: "More than 10 failed logins in 5 minutes on auth-service - possible brute force attempt."
+
+      - alert: LowStockAlert
+        expr: inventory_low_stock_items > 0
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "{{ $value }} product(s) are low on stock"
+          description: "inventory-service reports SKUs below their low-stock threshold for over 5 minutes."
+
+      - alert: HighMemoryUsage
+        expr: process_resident_memory_bytes > 300000000
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High memory usage on {{ $labels.job }}"
+          description: "{{ $labels.job }} is using more than 300MB resident memory."
+
+      - alert: PodCrashLooping
+        expr: increase(kube_pod_container_status_restarts_total{namespace="newera"}[10m]) > 3
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Pod {{ $labels.pod }} is crash-looping"
+          description: "Container {{ $labels.container }} in pod {{ $labels.pod }} restarted more than 3 times in 10 minutes."

@@ -1,0 +1,30 @@
+global:
+  resolve_timeout: 5m
+  # SMTP relay used to actually SEND the email. Gmail requires an "App Password"
+  # (not your normal Gmail password) - generate one at https://myaccount.google.com/apppasswords
+  # and set it via the SMTP_PASS env var / Kubernetes secret below.
+  smtp_smarthost: 'smtp.gmail.com:587'
+  smtp_from: 'newera-alerts@gmail.com'      # <-- replace with the Gmail account you generate the App Password for
+  smtp_auth_username: 'newera-alerts@gmail.com'
+  smtp_auth_password: 'REPLACE_WITH_GMAIL_APP_PASSWORD'
+  smtp_require_tls: true
+
+route:
+  receiver: 'newera-email-alerts'
+  group_by: ['alertname', 'severity']
+  group_wait: 10s
+  group_interval: 1m
+  repeat_interval: 1h
+
+receivers:
+  - name: 'newera-email-alerts'
+    email_configs:
+      - to: 'kalirahul176@gmail.com'
+        send_resolved: true
+
+inhibit_rules:
+  - source_match:
+      severity: 'critical'
+    target_match:
+      severity: 'warning'
+    equal: ['alertname', 'job']
