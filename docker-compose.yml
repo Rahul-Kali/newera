@@ -193,9 +193,9 @@ services:
       INVENTORY_SERVICE_URL: http://inventory-service:3005
       PAYMENT_SERVICE_URL: http://payment-service:3006
       NOTIFICATION_SERVICE_URL: http://notification-service:3007
-      PORT: 8080
+      PORT: 8084
     depends_on: [user-service, product-service, order-service, auth-service, inventory-service, payment-service, notification-service]
-    ports: ["8080:8080"]
+    ports: ["8084:8084"]
     networks: [newera-net]
 
   prometheus:
